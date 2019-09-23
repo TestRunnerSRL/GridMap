@@ -1,0 +1,117 @@
+﻿<Window x:Class="GridMap.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GridMap"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="800"
+        Name="mainWindow">
+
+    <Window.Resources>
+        <local:ScreenToStringConverter x:Key="ScreenToStringConverter"/>
+        <local:PercentToStringConverter x:Key="PercentToStringConverter"/>
+
+        <DataTemplate x:Key="DataTemplate_Level2">
+            <Border BorderBrush="#FF303030" Background="Black" BorderThickness="1" Width="160" Height="120" AllowDrop="True" Drop="ImageDrop" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="0" MinHeight="0" MouseEnter="Border_MouseEnter" MouseLeave="Border_MouseLeave" DragEnter="Border_DragEnter" DragLeave="Border_DragLeave" MouseMove="Border_MouseMove" RenderTransformOrigin="0.5,0.5">
+                <Border.LayoutTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="{Binding ElementName=mainWindow, Path=ViewModel.Zoom, Mode=OneWay}" ScaleY="{Binding ElementName=mainWindow, Path=ViewModel.Zoom, Mode=OneWay}"/>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Border.LayoutTransform>
+                <Grid>
+                    <Label Content="{Binding Coordinates, Mode=OneWay}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Visibility="{Binding ShowLabel, Mode=OneWay}" Background="{Binding DragColor, Mode=OneWay}" Foreground="#40FFFFFF" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="72" Panel.ZIndex="1"/>
+                    <local:ImageURL Source="{Binding URL, Mode=OneWay, Converter={StaticResource ScreenToStringConverter}, TargetNullValue={x:Null}}" Stretch="Uniform"/>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DataTemplate_Level1">
+            <ItemsControl ItemsSource="{Binding Mode=OneWay}" ItemTemplate="{DynamicResource DataTemplate_Level2}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        
+        <Menu>
+            <MenuItem Header="_Connection">
+                <MenuItem Name="menuHostButton" Header="_Host" IsEnabled="{Binding Connection.CanHost, Mode=OneWay}" Click="MenuHostButton_Click"/>
+                <MenuItem Name="menuJoinButton" Header="_Join" IsEnabled="{Binding Connection.CanJoin, Mode=OneWay}" Click="MenuJoinButton_Click"/>
+                <MenuItem Name="menuLeaveButton" Header="_Leave" IsEnabled="{Binding Connection.CanLeave, Mode=OneWay}" Click="MenuLeaveButton_Click"/>
+            </MenuItem>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <TextBlock Text="Zoom" VerticalAlignment="Center" Margin="3"/>
+                <Slider HorizontalAlignment="Left" Minimum="0.1" Width="100" Margin="3" Value="{Binding Zoom, Mode=TwoWay}"/>
+                <TextBox Text="{Binding Zoom, Converter={StaticResource PercentToStringConverter}, Mode=TwoWay}" Width="40" VerticalAlignment="Center" />
+            </StackPanel>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer  Grid.Row="1" Grid.Column="1" Foreground="Black" Background="Black" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MouseMove="MapGrid_MouseMove" MouseDown="ScrollViewer_MouseDown">
+                <ItemsControl ItemsSource="{Binding Screens, Mode=OneWay}" x:Name="MapGrid" ItemTemplate="{StaticResource DataTemplate_Level1}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel.LayoutTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="-90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </StackPanel.LayoutTransform>
+                <Button x:Name="btn_del_left" Content="Delete Column" Margin="3" />
+                <Button x:Name="btn_add_left" Content="Add Column" Margin="3" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel.LayoutTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="90"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </StackPanel.LayoutTransform>
+                <Button x:Name="btn_add_right" Content="Add Column" Margin="3" />
+                <Button x:Name="btn_del_right" Content="Delete Column" Margin="3" />
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="btn_add_top" Content="Add Row" Margin="3" />
+                <Button x:Name="btn_del_top" Content="Delete Row" Margin="3" />
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="btn_add_bottom" Content="Add Row" Margin="3" />
+                <Button x:Name="btn_del_bottom" Content="Delete Row" Margin="3" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
